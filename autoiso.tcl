@@ -3,6 +3,11 @@ package require http
 package require platform
 set platform $tcl_platform(platform)
 
+array set temp_files {
+                      extract_dir EXTRACT
+                      bootfile etfsboot.com
+}
+
 
 # parser config
 namespace eval Config {
@@ -40,7 +45,7 @@ namespace eval Config {
 
         try {
             interp eval $parser $body
-         } finally {
+        } finally {
             set curr_conf ""
         }
     }
@@ -107,31 +112,31 @@ proc download_file {url dest} {
 }
 
 proc pshell {cmd} {
-     set cmd "-command $cmd"
-     foreach chan {stdin stdout stderr} {
-             lassign [chan pipe] rd$chan wr$chan
-     }
-     if {[catch {
+    set cmd "-command $cmd"
+    foreach chan {stdin stdout stderr} {
+        lassign [chan pipe] rd$chan wr$chan
+    }
+    if {[catch {
         package require twapi_process
         set cmd [string map [list \" \\\"] $cmd]
         twapi::create_process [auto_execok powershell] -cmdline $cmd -showwindow hidden \
-         -inherithandles 1 -stdchannels [list $rdstdin $wrstdout $wrstderr]
-     } ret]} {
+            -inherithandles 1 -stdchannels [list $rdstdin $wrstdout $wrstderr]
+    } ret]} {
         return [list -1 "" $ret]
-     }
-     chan close $wrstdin; chan close $rdstdin; chan close $wrstdout; chan close $wrstderr
-     foreach chan [list $rdstdout $rdstderr] {
-             chan configure $chan -encoding cp850 -blocking true; # -buffering full?; # -enc?
-     }
-     set out [read $rdstdout]; set err [read $rdstderr]
-     chan close $rdstdout; chan close $rdstderr
-     return [list [string compare $err ""] $out $err]
+    }
+    chan close $wrstdin; chan close $rdstdin; chan close $wrstdout; chan close $wrstderr
+    foreach chan [list $rdstdout $rdstderr] {
+        chan configure $chan -encoding cp850 -blocking true; # -buffering full?; # -enc?
+    }
+    set out [read $rdstdout]; set err [read $rdstderr]
+    chan close $rdstdout; chan close $rdstderr
+    return [list [string compare $err ""] $out $err]
 }
 
 
 proc mount_iso { src { dest ""} } {
     if { $::platform == "windows" } {
-        exec 7z x $src -o$dest
+        exec 7z.exe x $src -oEXTRACT
     } else {
         return [exec -ignorestderr mount $src $dest]
     }
@@ -155,6 +160,14 @@ proc copy_to_iso {filelist dest} {
 
 
 proc main {} {
+
+    array for {id path} ::temp_files {
+        if  [file exists $path]  {
+            file delete -force $path
+        }
+    }
+
+
     array set cli_opts {--iso-path 0 --iso-url "https://dl.malwarewatch.org/windows/Windows-XP.iso" --config-path 0  }
     array set cli_opts $::argv
     set iso $cli_opts(--iso-path)
@@ -174,28 +187,31 @@ proc main {} {
     parse_file $cli_opts(--config-path)
 
     if { $::platform == "windows" } {
-	set dest "\EXTRACT"
+        lassign "EXTRACT" copy dest
         mount_iso $iso $dest
-        set copy "\EXTRACT"
-    } else {
-    mount_iso $iso $dest
-    set copy "iso-modified"
 
-    file copy  $dest $copy
+    } else {
+        mount_iso $iso $dest
+        set copy "iso-modified"
+
+        file copy  $dest $copy
     }
     file mkdir "$copy/\$OEM\$/\$\$/IMAGES"
 
 
     copy_to_iso ::Config::extra_bin $copy
     copy_to_iso ::Config::extra_script $copy
-    file copy "./winnt.sif" "$copy/i386/WINNT.SIF"
+
 
     after 1000
     if { $::platform == "windows" } {
-puts "Need folder2iso"
-} else { 
-    exec -ignorestderr xorriso   -indev $iso   -outdev ./xp_mod.iso   -map '$copy/\$OEM\$' '\$OEM\$'   -boot_image any replay   -commit
-}
+      file copy "./winnt.sif" "./$copy/I386/WINNT.SIF"
+      file copy "./$copy/\[BOOT\]/Boot-NoEmul.img" "./etfsboot.com"
+        exec -ignorestderr oscdimg.exe -lWXPVOL_FR -betfsboot.com -n -m "EXTRACT" "ISO-BDJEUX.iso"
+    } else {
+            file copy "./winnt.sif" "$copy/i386/WINNT.SIF"
+        exec -ignorestderr xorriso   -indev $iso   -outdev ./xp_mod.iso   -map '$copy/\$OEM\$' '\$OEM\$'   -boot_image any replay   -commit
+    }
     after 3000
     if { $::platform != "windows" } {
         exec umount $dest
