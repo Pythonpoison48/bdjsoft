@@ -2,7 +2,7 @@ extra_script {
 }
 
 extra_bin {
-          cs1.6 "https://cs16download.com/url=aHR0cHM6Ly9jc2Rvd25sb2Fkcy5jb20vR1NDbGllbnRfU2V0dXAuZXhl" {$OEM$/$$/Images/cs_setup.exe}
-          wallpaper "wallpaper1.png" {$OEM$/$$/Images/wallpaper.png}
+          cs1.6 "https://cs16download.com/url=aHR0cHM6Ly9jc2Rvd25sb2Fkcy5jb20vR1NDbGllbnRfU2V0dXAuZXhl" {$OEM$/$$/IMAGES/CS.EXE}
+
 
 }

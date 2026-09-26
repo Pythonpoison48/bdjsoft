@@ -1,7 +1,7 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/env tclsh9.0
 package require http
 package require platform
-set platform tcl_platform(platform)
+set platform $tcl_platform(platform)
 
 
 # parser config
@@ -131,7 +131,7 @@ proc pshell {cmd} {
 
 proc mount_iso { src { dest ""} } {
     if { $::platform == "windows" } {
-        exec 7z -e $src $dest
+        exec 7z x $src -o$dest
     } else {
         return [exec -ignorestderr mount $src $dest]
     }
@@ -159,7 +159,8 @@ proc main {} {
     array set cli_opts $::argv
     set iso $cli_opts(--iso-path)
     set config $cli_opts(--config-path)
-    set dest "/mnt/media/"
+	
+    set dest "/tmp/media"
     if { $config  == 0 } {
         exit "Need at least option --config-path <path_to_config> to work"
     }
@@ -169,26 +170,34 @@ proc main {} {
         set $iso "windowsxp.iso"
     }
 
+
     parse_file $cli_opts(--config-path)
 
-
+    if { $::platform == "windows" } {
+	set dest "\EXTRACT"
+        mount_iso $iso $dest
+        set copy "\EXTRACT"
+    } else {
     mount_iso $iso $dest
-
     set copy "iso-modified"
-    file copy  $dest $copy
 
-    file mkdir "$copy/\$OEM\$/\$\$/Images"
+    file copy  $dest $copy
+    }
+    file mkdir "$copy/\$OEM\$/\$\$/IMAGES"
 
 
     copy_to_iso ::Config::extra_bin $copy
     copy_to_iso ::Config::extra_script $copy
-    file copy "./winnt.sif" "$copy/i386/winnt.sif"
+    file copy "./winnt.sif" "$copy/i386/WINNT.SIF"
 
     after 1000
+    if { $::platform == "windows" } {
+puts "Need folder2iso"
+} else { 
     exec -ignorestderr xorriso   -indev $iso   -outdev ./xp_mod.iso   -map '$copy/\$OEM\$' '\$OEM\$'   -boot_image any replay   -commit
-
+}
     after 3000
-    if { $platform != "windows" } {
+    if { $::platform != "windows" } {
         exec umount $dest
 
     }

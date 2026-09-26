@@ -1,0 +1,73 @@
+; ================================================================
+; Windows XP - Installation totalement automatise
+; ================================================================
+; IMPORTANT : cette configuration est DESTRUCTIVE.
+; Repartition=Yes efface/repartitionne le disque cible.
+;  utiliser uniquement sur une VM ou une machine ddie.
+;
+;  placer dans :
+;   <CD_XP>\I386\WINNT.SIF
+;
+; Structure OEM :
+;   <CD_XP>\$OEM$\$1\...      -> C:\...
+;   <CD_XP>\$OEM$\$$\...      -> C:\WINDOWS\...
+;   <CD_XP>\$OEM$\$Progs\...  -> C:\Program Files\...
+;   <CD_XP>\$OEM$\$Docs\...   -> C:\Documents and Settings\...
+;   <CD_XP>\$OEM$\Cmdlines.txt -> commandes excutes pendant Setup
+; ================================================================
+
+[Data]
+    AutoPartition=1
+    MsDosInitiated="0"
+    UnattendedInstall="Yes"
+
+[Unattended]
+    UnattendMode=FullUnattended
+    UnattendSwitch=Yes
+    OemPreinstall=Yes
+    OemSkipEula=Yes
+    Repartition=Yes
+    FileSystem=NTFS
+    TargetPath=\WINDOWS
+    WaitForReboot=No
+    DriverSigningPolicy=Ignore
+    NonDriverSigningPolicy=Ignore
+
+
+    ; Drivers supplémentaire  dans      $OEM$\$1\Drivers
+    ; OemPnPDriversPath="Drivers\Chipset;Drivers\LAN;Drivers\Audio;Drivers\Video"
+
+[GuiUnattended]
+    AdminPassword="BDJDABEST1337"
+    EncryptedAdminPassword=No
+    OEMSkipRegional=1
+    TimeZone=105
+    OemSkipWelcome=1
+
+[UserData]
+    ProductKey="M6TF9-8XQ2M-YQK9F-7TBB2-XGG88"
+    FullName="BDJEUX"
+    OrgName=""
+    ComputerName=XP-PC
+
+[RegionalSettings]
+    LanguageGroup=1
+    Language=0000040C
+
+[Display]
+    BitsPerPel=32
+    Xresolution=1024
+    YResolution=768
+    Vrefresh=60
+
+[Identification]
+    JoinWorkgroup=WORKGROUP
+
+[Networking]
+    InstallDefaultComponents=Yes
+
+[GuiRunOnce]
+    ; pour les script postinstall 
+    ; exemple si  	$OEM$\$1\Setup\postinstall.cmd existe 
+    ; alors pour le lancer au premier login 
+    ; Command0="%systemdrive%\Setup\postinstall.cmd"
