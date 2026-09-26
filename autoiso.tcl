@@ -188,8 +188,11 @@ proc main {} {
     exec -ignorestderr xorriso   -indev $iso   -outdev ./xp_mod.iso   -map '$copy/\$OEM\$' '\$OEM\$'   -boot_image any replay   -commit
 
     after 3000
+    if { $platform != "windows" } {
+        exec umount $dest
 
-exec "umount $dest"
+    }
+
 }
 
 main
