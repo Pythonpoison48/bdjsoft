@@ -1,0 +1,10 @@
+extra_script {
+	autoinstall "./install.cmd"  {$OEM$/$1/Setup/postinstall.cmd}
+}
+
+extra_bin {
+          bdj1 "https://bdj.esiea.fr/public/img/logo.png" {$OEM$/$Docs/Administrator/Desktop/wallpapers/bdj1.png}
+          cs1.6 "https://cstrike.csdownload.net/cstrike.exe" {$OEM$/$Docs/Administrator/Desktop/Installers/cs1.6.exe}
+          z7 "https://github.com/ip7z/7zip/releases/download/26.03/7z2603.exe" {$OEM$/$Docs/Administrator/Desktop/Installers/7z2603.exe}
+          ue2 "https://github.com/Bioruebe/UniExtract2/releases/download/v2.0.0-rc.3/UniExtractRC3.zip" {$OEM$/$Docs/Administrator/Desktop/Installers/uniextract2.zip}
+}

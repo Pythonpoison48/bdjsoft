@@ -1,0 +1,11 @@
+extra_script {
+
+}
+
+extra_bin {
+          bdj1 "https://bdj.esiea.fr/public/img/logo.png" {$OEM$/$Docs/Administrator/Desktop/wallpapers/bdj1.png}
+          cs1.6 "https://cdn.cs-lead.net/material_files/cs-16-windows-xp.exe" {$OEM$/$Docs/Administrator/Desktop/Installers/cs1.6.exe}
+
+
+
+}
